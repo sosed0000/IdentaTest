@@ -1,5 +1,7 @@
 package com.identa.denisov.controller;
 
+import com.identa.denisov.dto.OrderDTO;
+import com.identa.denisov.model.Dish;
 import com.identa.denisov.model.Order;
 import com.identa.denisov.model.OrderStatus;
 import com.identa.denisov.service.OrderService;
@@ -30,10 +32,18 @@ public class WebSocketController {
     }
     @MessageMapping("/newOrder")
     @SendTo("/topic/orders")
-    public Order newOrder(String description) {
+    public OrderDTO newOrder(String description) {
         Order order = orderService.createOrder(description);
         messagingTemplate.convertAndSend("/topic/orderStatusUpdate", order);
-        return order;
+
+        // Создание и возврат DTO
+        OrderDTO orderDTO = new OrderDTO();
+        orderDTO.setId(order.getId());
+        orderDTO.setDescription(order.getDescription());
+        orderDTO.setCreatedAt(order.getCreatedAt());
+        orderDTO.setStatus(order.getStatus());
+
+        return orderDTO;
     }
 
     @MessageMapping("/takeOrder/{orderId}")
@@ -46,7 +56,15 @@ public class WebSocketController {
             if (order.getStatus() == OrderStatus.OPEN) {
                 order.setStatus(OrderStatus.IN_PROGRESS);
                 orderService.saveOrder(order);
-                messagingTemplate.convertAndSend("/topic/orderStatusUpdate", order);
+
+                // Создание DTO и отправка
+                OrderDTO orderDTO = new OrderDTO();
+                orderDTO.setId(order.getId());
+                orderDTO.setDescription(order.getDescription());
+                orderDTO.setCreatedAt(order.getCreatedAt());
+                orderDTO.setStatus(order.getStatus());
+
+                messagingTemplate.convertAndSend("/topic/orderStatusUpdate", orderDTO);
             } else {
                 logger.info("Order is not open for processing.");
             }
@@ -54,6 +72,7 @@ public class WebSocketController {
             logger.info("Order not found.");
         }
     }
+
 
     @MessageMapping("/completeOrder/{orderId}")
     public void completeOrder(@DestinationVariable Long orderId) {
@@ -73,5 +92,13 @@ public class WebSocketController {
             logger.info("Order not found.");
         }
     }
+
+    @MessageMapping("/addDishToOrder/{orderId}")
+    @SendTo("/topic/orderStatusUpdate")
+    public Order addDishToOrder(@DestinationVariable Long orderId, Dish dish) {
+        orderService.addDishToOrder(orderId, dish);
+        return orderService.getOrderById(orderId).orElse(null);
+    }
+
 
 }

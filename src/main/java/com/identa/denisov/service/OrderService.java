@@ -1,5 +1,6 @@
 package com.identa.denisov.service;
 
+import com.identa.denisov.model.Dish;
 import com.identa.denisov.model.Order;
 import com.identa.denisov.model.OrderStatus;
 
@@ -12,4 +13,7 @@ public interface OrderService {
     Order createOrder(String description);
     Optional<Order> getOrderById(Long id);
     Order saveOrder(Order order);
+    void addDishToOrder(Long orderId, Dish dish);
+    void removeDishFromOrder(Long orderId, Long dishId);
+
 }

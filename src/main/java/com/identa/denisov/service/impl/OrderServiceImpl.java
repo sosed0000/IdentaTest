@@ -1,6 +1,7 @@
 package com.identa.denisov.service.impl;
 
 import com.identa.denisov.controller.WebSocketController;
+import com.identa.denisov.model.Dish;
 import com.identa.denisov.model.Order;
 import com.identa.denisov.model.OrderStatus;
 import com.identa.denisov.repository.OrderRepository;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,6 +41,7 @@ public class OrderServiceImpl implements OrderService {
         order.setDescription(description);
         order.setCreatedAt(LocalDateTime.now());
         order.setStatus(OrderStatus.OPEN);
+        order.setDishes(new ArrayList<>());
         orderRepository.save(order);
         logger.info("New order created with id: {}", order.getId());
         logAllOrders();
@@ -65,5 +68,31 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public List<Order> getAllOrdersByStatus(OrderStatus status) {
         return orderRepository.findAllByStatus(status);
+    }
+
+    @Override
+    public void addDishToOrder(Long orderId, Dish dish) {
+        Optional<Order> optionalOrder = orderRepository.findById(orderId);
+        if (optionalOrder.isPresent()) {
+            Order order = optionalOrder.get();
+            dish.setOrder(order);
+            order.getDishes().add(dish);
+            orderRepository.save(order);
+        }
+    }
+
+    @Override
+    public void removeDishFromOrder(Long orderId, Long dishId) {
+        Order order = getOrderById(orderId).orElse(null);
+//        if (order != null) {
+//            Dish dishToRemove = order.getDishes().stream()
+//                    .filter(dish -> dish.getId().equals(dishId))
+//                    .findFirst()
+//                    .orElse(null);
+//            if (dishToRemove != null) {
+//                order.getDishes().remove(dishToRemove);
+//                saveOrder(order);
+//            }
+//        }
     }
 }

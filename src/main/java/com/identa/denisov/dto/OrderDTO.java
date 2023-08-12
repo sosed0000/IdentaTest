@@ -1,23 +1,14 @@
-package com.identa.denisov.model;
+package com.identa.denisov.dto;
 
-import jakarta.persistence.*;
+import com.identa.denisov.model.OrderStatus;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
-@Entity
-@Table(name = "orders")
-public class Order {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class OrderDTO {
     private Long id;
     private String description;
     private LocalDateTime createdAt;
-    @Enumerated(EnumType.STRING)
     private OrderStatus status;
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private List<Dish> dishes;
 
     public Long getId() {
         return id;
@@ -49,13 +40,5 @@ public class Order {
 
     public void setStatus(OrderStatus status) {
         this.status = status;
-    }
-
-    public List<Dish> getDishes() {
-        return dishes;
-    }
-
-    public void setDishes(List<Dish> dishes) {
-        this.dishes = dishes;
     }
 }
