@@ -23,8 +23,8 @@ public class OrderRestController {
         return orderService.getAllOrders();
     }
 
-    @GetMapping("/getDishes") // Добавляем новый эндпойнт для получения списка блюд
+    @GetMapping("/getDishes")
     public List<Dish> getDishes() {
-        return orderService.getAllDishes(); // Вам нужно определить этот метод в вашем OrderService
+        return orderService.getAllDishes();
     }
 }

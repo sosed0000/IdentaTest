@@ -13,6 +13,7 @@ stompClient.connect({}, () => {
             dishes.forEach(dish => {
                 const dishContainer = document.createElement('div');
                 dishContainer.className = 'dish';
+                dishContainer.style.display = 'flex';
 
                 const checkbox = document.createElement('input');
                 checkbox.type = 'checkbox';
@@ -21,6 +22,7 @@ stompClient.connect({}, () => {
 
                 const label = document.createElement('label');
                 label.textContent = dish.name;
+                label.style.flex = '1';
 
                 const quantityInput = document.createElement('input');
                 quantityInput.type = 'number';
@@ -28,7 +30,8 @@ stompClient.connect({}, () => {
                 quantityInput.value = 1;
                 quantityInput.min = 1;
                 quantityInput.max = 10;
-                quantityInput.className = 'dish-quantity';
+                quantityInput.style.width = '30px';
+                quantityInput.style.textAlign = 'right';
                 quantityInput.disabled = true;
 
                 checkbox.addEventListener('change', () => {
@@ -50,35 +53,36 @@ stompClient.connect({}, () => {
         .catch(error => {
             console.error("Error fetching dishes:", error);
         });
-
     orderForm.addEventListener('submit', async (event) => {
         event.preventDefault();
         const description = orderDescriptionInput.value;
 
-        const selectedDishes = Array.from(document.querySelectorAll('input[name="dishes"]:checked')).map(input => input.value);
+        const selectedDishes = Array.from(document.querySelectorAll('input[name="dishes"]:checked')).map(input => {
+            const quantityInput = input.nextElementSibling.nextElementSibling;
+            const quantity = parseInt(quantityInput.value);
+            return {dishId: input.value, quantity: quantity};
+        });
 
         const response = await fetch('/createOrder', {
-            method: 'POST',
-            headers: {
+            method: 'POST', headers: {
                 'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                description,
-                dishIds: selectedDishes,
+            }, body: JSON.stringify({
+                description, selectedDishes,
             }),
         });
 
         if (response.ok) {
-            const order = await response.json(); // Получаем объект заказа из ответа
+            const order = await response.json();
             orderDescriptionInput.value = '';
-            selectedDishes.forEach(dishId => {
-                const checkbox = document.querySelector(`input[name="dishes"][value="${dishId}"]`);
+            selectedDishes.forEach(dish => {
+                const checkbox = document.querySelector(`input[name="dishes"][value="${dish.dishId}"]`);
                 checkbox.checked = false;
+                const quantityInput = checkbox.nextElementSibling.nextElementSibling;
+                quantityInput.value = 1;
+                quantityInput.setAttribute('disabled', true);
             });
 
-            // Не отправляем новый объект, используем полученный объект
             stompClient.send("/app/newOrder", {}, JSON.stringify(order));
         }
     });
-
 });

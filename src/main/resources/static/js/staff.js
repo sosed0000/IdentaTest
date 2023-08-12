@@ -58,7 +58,7 @@ function fetchOrders() {
         .then(response => response.json())
         .then(orders => {
             const orderList = document.getElementById('orderList');
-            orderList.innerHTML = ''; // Clear the list before adding new orders
+            orderList.innerHTML = '';
             orders.forEach(order => {
                 addOrderToList(order);
             });

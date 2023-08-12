@@ -3,7 +3,6 @@ package com.identa.denisov.model;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -16,9 +15,9 @@ public class Order {
     private LocalDateTime createdAt;
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private List<Dish> dishes;
 
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<OrderedDish> orderedDishes;
     public Long getId() {
         return id;
     }
@@ -51,11 +50,11 @@ public class Order {
         this.status = status;
     }
 
-    public List<Dish> getDishes() {
-        return dishes;
+    public List<OrderedDish> getOrderedDishes() {
+        return orderedDishes;
     }
 
-    public void setDishes(List<Dish> dishes) {
-        this.dishes = dishes;
+    public void setOrderedDishes(List<OrderedDish> orderedDishes) {
+        this.orderedDishes = orderedDishes;
     }
 }

@@ -13,7 +13,7 @@ h1 {
 }
 
 h2 {
-    margin-bottom: 30px; /* Увеличили отступ снизу для второй строки */
+    margin-bottom: 30px;
 }
 
 .image-container {
@@ -24,11 +24,11 @@ h2 {
 
 .image-link {
     display: flex;
-    flex-direction: column; /* Добавили flex-direction для подписей */
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     width: 200px;
-    height: 300px; /* Оставили высоту такой же */
+    height: 300px;
     margin: 10px;
     border-radius: 10px;
     overflow: hidden;
@@ -42,9 +42,9 @@ h2 {
 }
 
 .image-link p {
-    margin-top: 10px; /* Отступ сверху для подписи */
+    margin-top: 10px;
 }
 
 .image-link:hover {
-    transform: scale(1.25); /* Увеличили масштаб при наведении */
+    transform: scale(1.25);
 }

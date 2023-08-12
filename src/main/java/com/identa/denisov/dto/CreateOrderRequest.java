@@ -1,11 +1,12 @@
 package com.identa.denisov.dto;
 
+import com.identa.denisov.model.SelectedDish;
+
 import java.util.List;
 
 public class CreateOrderRequest {
     private String description;
-    private List<Long> dishIds;
-
+    private List<SelectedDish> selectedDishes;
     public String getDescription() {
         return description;
     }
@@ -14,11 +15,11 @@ public class CreateOrderRequest {
         this.description = description;
     }
 
-    public List<Long> getDishIds() {
-        return dishIds;
+    public List<SelectedDish> getSelectedDishes() {
+        return selectedDishes;
     }
 
-    public void setDishIds(List<Long> dishIds) {
-        this.dishIds = dishIds;
+    public void setSelectedDishes(List<SelectedDish> selectedDishes) {
+        this.selectedDishes = selectedDishes;
     }
 }

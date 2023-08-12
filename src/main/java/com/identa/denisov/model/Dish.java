@@ -16,17 +16,6 @@ public class Dish {
     private Long id;
     private String name;
     private double price;
-    @JsonIgnore
-    @ManyToOne
-    private Order order;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     public String getName() {
         return name;
@@ -34,6 +23,14 @@ public class Dish {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public double getPrice() {
@@ -44,11 +41,4 @@ public class Dish {
         this.price = price;
     }
 
-    public Order getOrder() {
-        return order;
-    }
-
-    public void setOrder(Order order) {
-        this.order = order;
-    }
 }

@@ -5,6 +5,7 @@ import com.identa.denisov.dto.OrderDTO;
 import com.identa.denisov.model.Dish;
 import com.identa.denisov.model.Order;
 import com.identa.denisov.model.OrderStatus;
+import com.identa.denisov.model.SelectedDish;
 import com.identa.denisov.service.OrderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +23,6 @@ import java.util.Optional;
 public class WebSocketController {
 
     private final Logger logger = LoggerFactory.getLogger(WebSocketController.class);
-
     private final OrderService orderService;
     private final SimpMessagingTemplate messagingTemplate;
 
@@ -34,7 +34,7 @@ public class WebSocketController {
     @SendTo("/topic/orders")
     public OrderDTO newOrder(Order order) {
         messagingTemplate.convertAndSend("/topic/orderStatusUpdate", order);
-//возврат DTO
+
         OrderDTO orderDTO = new OrderDTO();
         orderDTO.setId(order.getId());
         orderDTO.setDescription(order.getDescription());
@@ -55,7 +55,6 @@ public class WebSocketController {
                 order.setStatus(OrderStatus.IN_PROGRESS);
                 orderService.saveOrder(order);
 
-                // Создание DTO и отправка
                 OrderDTO orderDTO = new OrderDTO();
                 orderDTO.setId(order.getId());
                 orderDTO.setDescription(order.getDescription());
@@ -70,7 +69,6 @@ public class WebSocketController {
             logger.info("Order not found.");
         }
     }
-
 
     @MessageMapping("/completeOrder/{orderId}")
     public void completeOrder(@DestinationVariable Long orderId) {
@@ -91,25 +89,26 @@ public class WebSocketController {
         }
     }
 
-    @MessageMapping("/addDishToOrder/{orderId}")
+    @MessageMapping("/addDishToOrder/{orderId}/{dishId}/{quantity}")
     @SendTo("/topic/orderStatusUpdate")
-    public Order addDishToOrder(@DestinationVariable Long orderId, Dish dish) {
-        orderService.addDishToOrder(orderId, dish);
+    public Order addDishToOrder(
+            @DestinationVariable Long orderId,
+            @PathVariable Long dishId,
+            @PathVariable int quantity) {
+
+        orderService.addDishToOrder(orderId, dishId, quantity);
         return orderService.getOrderById(orderId).orElse(null);
     }
 
     @PostMapping("/createOrder")
     public ResponseEntity<OrderDTO> createOrder(@RequestBody CreateOrderRequest request) {
         String description = request.getDescription();
-        List<Long> dishIds = request.getDishIds();
+        List<SelectedDish> dishIds = request.getSelectedDishes();
 
-        // Создание заказа с описанием и блюдами
         Order order = orderService.createOrderWithDishes(description, dishIds);
 
-        // Отправка обновленного статуса заказа через WebSocket
         messagingTemplate.convertAndSend("/topic/orderStatusUpdate", order);
 
-        // Создание и возврат DTO
         OrderDTO orderDTO = new OrderDTO();
         orderDTO.setId(order.getId());
         orderDTO.setDescription(order.getDescription());
@@ -118,7 +117,5 @@ public class WebSocketController {
 
         return ResponseEntity.ok(orderDTO);
     }
-
-
 
 }

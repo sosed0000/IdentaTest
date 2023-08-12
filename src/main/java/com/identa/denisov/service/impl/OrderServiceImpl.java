@@ -1,9 +1,7 @@
 package com.identa.denisov.service.impl;
 
 import com.identa.denisov.controller.WebSocketController;
-import com.identa.denisov.model.Dish;
-import com.identa.denisov.model.Order;
-import com.identa.denisov.model.OrderStatus;
+import com.identa.denisov.model.*;
 import com.identa.denisov.repository.DishRepository;
 import com.identa.denisov.repository.OrderRepository;
 import com.identa.denisov.service.OrderService;
@@ -38,39 +36,30 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    public Order createOrder(String description) {
-        logger.info("Creating new order with description: {}", description);
+    public Order createOrderWithDishes(String description, List<SelectedDish> selectedDishes) {
         Order order = new Order();
         order.setDescription(description);
         order.setCreatedAt(LocalDateTime.now());
         order.setStatus(OrderStatus.OPEN);
-        order.setDishes(new ArrayList<>());
-        orderRepository.save(order);
-        logger.info("New order created with id: {}", order.getId());
-        logAllOrders();
-        return order;
-    }
-    @Override
-    @Transactional
-    public Order createOrderWithDishes(String description, List<Long> dishIds) {
-        Order order = new Order();
-        order.setDescription(description);
-        order.setCreatedAt(LocalDateTime.now());
-        order.setStatus(OrderStatus.OPEN);
-        order.setDishes(new ArrayList<>());
 
-        for (Long dishId : dishIds) {
-            Dish dish = dishRepository.findById(dishId).orElse(null);
+        List<OrderedDish> orderedDishes = new ArrayList<>();
+
+        for (SelectedDish selectedDish : selectedDishes) {
+            Dish dish = dishRepository.findById(selectedDish.getDishId()).orElse(null);
             if (dish != null) {
-                dish.setOrder(order);
-                order.getDishes().add(dish);
+                OrderedDish orderedDish = new OrderedDish();
+                orderedDish.setDish(dish);
+                orderedDish.setQuantity(selectedDish.getQuantity());
+                orderedDishes.add(orderedDish);
             }
         }
 
+        order.setOrderedDishes(orderedDishes);
         orderRepository.save(order);
 
         return order;
     }
+
 
     private void logAllOrders() {
         List<Order> orders = orderRepository.findAll();
@@ -96,12 +85,32 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void addDishToOrder(Long orderId, Dish dish) {
+    public void addDishToOrder(Long orderId, Long dishId, int quantity) {
         Optional<Order> optionalOrder = orderRepository.findById(orderId);
-        if (optionalOrder.isPresent()) {
+        Optional<Dish> optionalDish = dishRepository.findById(dishId);
+
+        if (optionalOrder.isPresent() && optionalDish.isPresent()) {
             Order order = optionalOrder.get();
-            dish.setOrder(order);
-            order.getDishes().add(dish);
+            Dish dish = optionalDish.get();
+
+            boolean dishAlreadyExists = false;
+            for (OrderedDish existingDish : order.getOrderedDishes()) {
+                if (existingDish.getDish().getId().equals(dishId)) {
+                    existingDish.setQuantity(existingDish.getQuantity() + quantity);
+                    dishAlreadyExists = true;
+                    break;
+                }
+            }
+
+            if (!dishAlreadyExists) {
+                OrderedDish orderedDish = new OrderedDish();
+                orderedDish.setOrder(order);
+                orderedDish.setDish(dish);
+                orderedDish.setQuantity(quantity);
+
+                order.getOrderedDishes().add(orderedDish);
+            }
+
             orderRepository.save(order);
         }
     }
@@ -111,18 +120,5 @@ public class OrderServiceImpl implements OrderService {
         return dishRepository.findAll();
     }
 
-    @Override
-    public void removeDishFromOrder(Long orderId, Long dishId) {
-        Order order = getOrderById(orderId).orElse(null);
-//        if (order != null) {
-//            Dish dishToRemove = order.getDishes().stream()
-//                    .filter(dish -> dish.getId().equals(dishId))
-//                    .findFirst()
-//                    .orElse(null);
-//            if (dishToRemove != null) {
-//                order.getDishes().remove(dishToRemove);
-//                saveOrder(order);
-//            }
-//        }
-    }
+
 }
