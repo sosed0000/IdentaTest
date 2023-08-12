@@ -97,7 +97,7 @@ public class WebSocketControllerTest {
     public void testAddDishToOrder() {
         Long orderId = 1L;
         Long dishId = 1L;
-        int quantity = 2; // Just an example quantity
+        int quantity = 2;
 
         Dish dish = new Dish();
         dish.setId(dishId);
