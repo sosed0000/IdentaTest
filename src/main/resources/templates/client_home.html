@@ -2,12 +2,20 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Client</title>
+  <link rel="stylesheet" href="/css/index.css">
 </head>
 <body>
+<div class="back-button">
+  <a href="/">
+    <span class="back-arrow">&larr;</span> Back
+  </a>
+</div>
 <h1>Create Order</h1>
 <form id="orderForm">
-  <label for="orderDescription"></label><input type="text" id="orderDescription" placeholder="Order description" required>
+  <label for="orderDescription">Order description:</label>
+  <input type="text" id="orderDescription" placeholder="Enter order description" required>
   <button type="submit">Place Order</button>
 </form>
 <script src="/webjars/sockjs-client/1.5.1/sockjs.min.js"></script>
