@@ -51,6 +51,7 @@ public class OrderServiceImpl implements OrderService {
                 orderedDish.setDish(dish);
                 orderedDish.setQuantity(selectedDish.getQuantity());
                 orderedDishes.add(orderedDish);
+                dishRepository.save(dish);
             }
         }
 

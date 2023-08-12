@@ -39,6 +39,7 @@ public class OrderServiceImplTest {
     }
 
 
+
     @Test
     void testCreateOrderWithDishes() {
         String description = "Test Order Description";
@@ -53,15 +54,17 @@ public class OrderServiceImplTest {
         dish.setPrice(10.0);
 
         when(dishRepository.findById(1L)).thenReturn(Optional.of(dish));
-        when(orderRepository.save(any(Order.class))).thenReturn(new Order());
+        when(dishRepository.save(any(Dish.class))).thenReturn(dish);
+        when(orderRepository.save(any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Order result = orderService.createOrderWithDishes(description, selectedDishes);
+        Order createdOrder = orderService.createOrderWithDishes(description, selectedDishes);
 
-        assertNotNull(result);
-        assertEquals(description, result.getDescription());
-        assertEquals(2, result.getOrderedDishes().size());
+        assertNotNull(createdOrder);
+        assertEquals(description, createdOrder.getDescription());
+        assertEquals(1, createdOrder.getOrderedDishes().size());
 
         verify(dishRepository, times(1)).findById(1L);
+        verify(dishRepository, times(1)).save(any(Dish.class));
         verify(orderRepository, times(1)).save(any(Order.class));
     }
 
@@ -95,7 +98,6 @@ public class OrderServiceImplTest {
 
         verify(orderRepository, times(1)).save(order);
     }
-
     @Test
     void testAddDishToOrder() {
         Long orderId = 1L;
@@ -112,17 +114,21 @@ public class OrderServiceImplTest {
         order.setOrderedDishes(orderedDishes);
 
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
-        when(dishRepository.save(any(Dish.class))).thenReturn(dish);
+        when(dishRepository.findById(dishId)).thenReturn(Optional.of(dish));
 
         orderService.addDishToOrder(orderId, dishId, quantity);
 
-        assertEquals(1, orderedDishes.size());
-        OrderedDish orderedDish = orderedDishes.get(0);
+        Order updatedOrder = orderService.getOrderById(orderId).orElse(null);
+        assertNotNull(updatedOrder);
+        assertEquals(1, updatedOrder.getOrderedDishes().size());
+
+        OrderedDish orderedDish = updatedOrder.getOrderedDishes().get(0);
         assertEquals(dishId, orderedDish.getDish().getId());
         assertEquals(quantity, orderedDish.getQuantity());
 
-        verify(orderRepository, times(1)).findById(orderId);
-        verify(dishRepository, times(1)).save(any(Dish.class));
+        verify(dishRepository, times(1)).findById(dishId);
+        verify(orderRepository, times(2)).findById(orderId);
+        verify(orderRepository, times(1)).save(order);
     }
 
     @Test
