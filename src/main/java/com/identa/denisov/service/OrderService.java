@@ -11,8 +11,10 @@ public interface OrderService {
     List<Order> getAllOrders();
     List<Order> getAllOrdersByStatus(OrderStatus status);
     Order createOrder(String description);
+    public Order createOrderWithDishes(String description, List<Long> dishIds);
     Optional<Order> getOrderById(Long id);
     Order saveOrder(Order order);
+    public List<Dish> getAllDishes();
     void addDishToOrder(Long orderId, Dish dish);
     void removeDishFromOrder(Long orderId, Long dishId);
 

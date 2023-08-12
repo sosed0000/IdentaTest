@@ -4,6 +4,7 @@ import com.identa.denisov.controller.WebSocketController;
 import com.identa.denisov.model.Dish;
 import com.identa.denisov.model.Order;
 import com.identa.denisov.model.OrderStatus;
+import com.identa.denisov.repository.DishRepository;
 import com.identa.denisov.repository.OrderRepository;
 import com.identa.denisov.service.OrderService;
 import org.slf4j.Logger;
@@ -20,12 +21,14 @@ import java.util.Optional;
 @Service
 public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
+    private final DishRepository dishRepository;
     private static final Logger logger = LoggerFactory.getLogger(WebSocketController.class);
 
 
     @Autowired
-    public OrderServiceImpl(OrderRepository orderRepository) {
+    public OrderServiceImpl(OrderRepository orderRepository, DishRepository dishRepository) {
         this.orderRepository = orderRepository;
+        this.dishRepository = dishRepository;
     }
 
     @Override
@@ -47,6 +50,28 @@ public class OrderServiceImpl implements OrderService {
         logAllOrders();
         return order;
     }
+    @Override
+    @Transactional
+    public Order createOrderWithDishes(String description, List<Long> dishIds) {
+        Order order = new Order();
+        order.setDescription(description);
+        order.setCreatedAt(LocalDateTime.now());
+        order.setStatus(OrderStatus.OPEN);
+        order.setDishes(new ArrayList<>());
+
+        for (Long dishId : dishIds) {
+            Dish dish = dishRepository.findById(dishId).orElse(null);
+            if (dish != null) {
+                dish.setOrder(order);
+                order.getDishes().add(dish);
+            }
+        }
+
+        orderRepository.save(order);
+
+        return order;
+    }
+
     private void logAllOrders() {
         List<Order> orders = orderRepository.findAll();
         for (Order order : orders) {
@@ -79,6 +104,11 @@ public class OrderServiceImpl implements OrderService {
             order.getDishes().add(dish);
             orderRepository.save(order);
         }
+    }
+
+    @Override
+    public List<Dish> getAllDishes() {
+        return dishRepository.findAll();
     }
 
     @Override
