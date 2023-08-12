@@ -2,7 +2,6 @@ package com.identa.denisov.controller;
 
 import com.identa.denisov.dto.CreateOrderRequest;
 import com.identa.denisov.dto.OrderDTO;
-import com.identa.denisov.model.Dish;
 import com.identa.denisov.model.Order;
 import com.identa.denisov.model.OrderStatus;
 import com.identa.denisov.model.SelectedDish;
@@ -105,7 +104,7 @@ public class WebSocketController {
         String description = request.getDescription();
         List<SelectedDish> dishIds = request.getSelectedDishes();
 
-        Order order = orderService.createOrderWithDishes(description, dishIds);
+        Order order = orderService.createOrder(description, dishIds);
 
         messagingTemplate.convertAndSend("/topic/orderStatusUpdate", order);
 

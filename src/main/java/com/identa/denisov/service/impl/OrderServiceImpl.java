@@ -36,7 +36,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    public Order createOrderWithDishes(String description, List<SelectedDish> selectedDishes) {
+    public Order createOrder(String description, List<SelectedDish> selectedDishes) {
         Order order = new Order();
         order.setDescription(description);
         order.setCreatedAt(LocalDateTime.now());

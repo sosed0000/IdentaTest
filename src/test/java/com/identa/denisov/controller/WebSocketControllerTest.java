@@ -9,7 +9,6 @@ import com.identa.denisov.model.SelectedDish;
 import com.identa.denisov.service.OrderService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -18,7 +17,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Optional;
 
@@ -131,14 +129,14 @@ public class WebSocketControllerTest {
 
         Order createdOrder = new Order();
 
-        when(orderService.createOrderWithDishes(eq("Test Order"), anyList())).thenReturn(createdOrder);
+        when(orderService.createOrder(eq("Test Order"), anyList())).thenReturn(createdOrder);
 
         ResponseEntity<OrderDTO> responseEntity = webSocketController.createOrder(request);
 
         assertNotNull(responseEntity.getBody());
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
 
-        verify(orderService, times(1)).createOrderWithDishes(eq("Test Order"), anyList());
+        verify(orderService, times(1)).createOrder(eq("Test Order"), anyList());
         verify(messagingTemplate, times(1)).convertAndSend(eq("/topic/orderStatusUpdate"), eq(createdOrder));
     }
 }

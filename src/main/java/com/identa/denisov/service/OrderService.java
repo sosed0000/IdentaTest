@@ -11,10 +11,10 @@ import java.util.Optional;
 public interface OrderService {
     List<Order> getAllOrders();
     List<Order> getAllOrdersByStatus(OrderStatus status);
-    public Order createOrderWithDishes(String description, List<SelectedDish> dishIds);
+    Order createOrder(String description, List<SelectedDish> dishIds);
     Optional<Order> getOrderById(Long id);
     Order saveOrder(Order order);
-    public List<Dish> getAllDishes();
+    List<Dish> getAllDishes();
     void addDishToOrder(Long orderId, Long dishId, int quantity);
 
 }

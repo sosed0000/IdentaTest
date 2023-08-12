@@ -8,9 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.slf4j.Logger;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -29,9 +27,6 @@ public class OrderServiceImplTest {
 
     @InjectMocks
     private OrderServiceImpl orderService;
-
-    @Mock
-    private Logger logger;
 
     @BeforeEach
     void setUp() {
@@ -57,7 +52,7 @@ public class OrderServiceImplTest {
         when(dishRepository.save(any(Dish.class))).thenReturn(dish);
         when(orderRepository.save(any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Order createdOrder = orderService.createOrderWithDishes(description, selectedDishes);
+        Order createdOrder = orderService.createOrder(description, selectedDishes);
 
         assertNotNull(createdOrder);
         assertEquals(description, createdOrder.getDescription());
