@@ -53,6 +53,7 @@ stompClient.connect({}, () => {
         .catch(error => {
             console.error("Error fetching dishes:", error);
         });
+
     orderForm.addEventListener('submit', async (event) => {
         event.preventDefault();
         const description = orderDescriptionInput.value;
@@ -60,14 +61,17 @@ stompClient.connect({}, () => {
         const selectedDishes = Array.from(document.querySelectorAll('input[name="dishes"]:checked')).map(input => {
             const quantityInput = input.nextElementSibling.nextElementSibling;
             const quantity = parseInt(quantityInput.value);
-            return {dishId: input.value, quantity: quantity};
+            return { dishId: input.value, quantity: quantity };
         });
 
         const response = await fetch('/createOrder', {
-            method: 'POST', headers: {
+            method: 'POST',
+            headers: {
                 'Content-Type': 'application/json',
-            }, body: JSON.stringify({
-                description, selectedDishes,
+            },
+            body: JSON.stringify({
+                description,
+                selectedDishes,
             }),
         });
 
@@ -85,4 +89,5 @@ stompClient.connect({}, () => {
             stompClient.send("/app/newOrder", {}, JSON.stringify(order));
         }
     });
+
 });

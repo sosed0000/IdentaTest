@@ -29,18 +29,32 @@ public class WebSocketController {
         this.orderService = orderService;
         this.messagingTemplate = messagingTemplate;
     }
-    @MessageMapping("/newOrder")
-    @SendTo("/topic/orders")
-    public OrderDTO newOrder(Order order) {
-        messagingTemplate.convertAndSend("/topic/orderStatusUpdate", order);
 
+    private OrderDTO createOrderDTO(Order order) {
         OrderDTO orderDTO = new OrderDTO();
         orderDTO.setId(order.getId());
         orderDTO.setDescription(order.getDescription());
         orderDTO.setCreatedAt(order.getCreatedAt());
         orderDTO.setStatus(order.getStatus());
-
         return orderDTO;
+    }
+
+    @MessageMapping("/newOrder")
+    @SendTo("/topic/orders")
+    public OrderDTO newOrder(Order order) {
+        messagingTemplate.convertAndSend("/topic/orderStatusUpdate", order);
+        return createOrderDTO(order);
+    }
+
+    @PostMapping("/createOrder")
+    public ResponseEntity<OrderDTO> createOrder(@RequestBody CreateOrderRequest request) {
+        String description = request.getDescription();
+        List<SelectedDish> dishIds = request.getSelectedDishes();
+
+        Order order = orderService.createOrder(description, dishIds);
+        messagingTemplate.convertAndSend("/topic/orderStatusUpdate", order);
+
+        return ResponseEntity.ok(createOrderDTO(order));
     }
 
     @MessageMapping("/takeOrder/{orderId}")
@@ -97,24 +111,6 @@ public class WebSocketController {
 
         orderService.addDishToOrder(orderId, dishId, quantity);
         return orderService.getOrderById(orderId).orElse(null);
-    }
-
-    @PostMapping("/createOrder")
-    public ResponseEntity<OrderDTO> createOrder(@RequestBody CreateOrderRequest request) {
-        String description = request.getDescription();
-        List<SelectedDish> dishIds = request.getSelectedDishes();
-
-        Order order = orderService.createOrder(description, dishIds);
-
-        messagingTemplate.convertAndSend("/topic/orderStatusUpdate", order);
-
-        OrderDTO orderDTO = new OrderDTO();
-        orderDTO.setId(order.getId());
-        orderDTO.setDescription(order.getDescription());
-        orderDTO.setCreatedAt(order.getCreatedAt());
-        orderDTO.setStatus(order.getStatus());
-
-        return ResponseEntity.ok(orderDTO);
     }
 
 }
