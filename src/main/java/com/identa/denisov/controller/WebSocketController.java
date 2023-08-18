@@ -30,15 +30,6 @@ public class WebSocketController {
         this.messagingTemplate = messagingTemplate;
     }
 
-    private OrderDTO createOrderDTO(Order order) {
-        OrderDTO orderDTO = new OrderDTO();
-        orderDTO.setId(order.getId());
-        orderDTO.setDescription(order.getDescription());
-        orderDTO.setCreatedAt(order.getCreatedAt());
-        orderDTO.setStatus(order.getStatus());
-        return orderDTO;
-    }
-
     @MessageMapping("/newOrder")
     @SendTo("/topic/orders")
     public OrderDTO newOrder(Order order) {
@@ -113,4 +104,13 @@ public class WebSocketController {
         return orderService.getOrderById(orderId).orElse(null);
     }
 
+
+    private OrderDTO createOrderDTO(Order order) {
+        OrderDTO orderDTO = new OrderDTO();
+        orderDTO.setId(order.getId());
+        orderDTO.setDescription(order.getDescription());
+        orderDTO.setCreatedAt(order.getCreatedAt());
+        orderDTO.setStatus(order.getStatus());
+        return orderDTO;
+    }
 }
